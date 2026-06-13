@@ -13,6 +13,15 @@
 # Running natively lets Cookbook detect and use your Mac's GPU.
 set -e
 
+# Fix for macOS libexpat conflict with Homebrew Python (affects macOS Tahoe+).
+# Homebrew's Python is built against a newer libexpat than the system ships,
+# causing "Symbol not found: _XML_SetAllocTrackerActivationThreshold" errors.
+# Pointing the dynamic linker at Homebrew's expat resolves this for all
+# subprocesses (venv creation, pip, uvicorn, etc.).
+if [ -d "/opt/homebrew/opt/expat/lib" ]; then
+    export DYLD_LIBRARY_PATH="/opt/homebrew/opt/expat/lib:${DYLD_LIBRARY_PATH:-}"
+fi
+
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$REPO_DIR"
 
